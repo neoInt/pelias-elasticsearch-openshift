@@ -12,4 +12,7 @@ RUN chgrp -R 0 /usr/share/elasticsearch && \
     ulimit -n 65536 && \
     echo "*  -  nofile  65536" >> /etc/security/limits.conf
 
+ENV CLUSTER_NAME="gazetteer"
+ENV DISCOVERY_SERVICE="127.0.0.1"
+
 USER 1001
