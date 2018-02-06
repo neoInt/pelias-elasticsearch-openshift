@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: pelias-master
+    labels: 
+      component: pelias
+      role: master
+  spec:
+    ports:
+    - name: transport
+      port: 9300
+      protocol: TCP
+    selector:
+      deploymentconfig: pelias-master
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: pelias-master
+  spec:
+    replicas: 3
+    selector:
+      deploymentconfig: pelias-master
+    strategy:
+      # We set the type of strategy to Recreate, which means that it will be scaled down prior to being scaled up
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          deploymentconfig: pelias-master
+      spec:
+        volumes:
+        - name: pelias-master-1
+          emptyDir: {}
+        containers:
+        - name: es-master
+          image: neoint/pelias-elasticsearch-openshift
+          env: 
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: "CLUSTER_NAME"
+            value: "gazetteer"
+          - name: "NUMBER_OF_MASTERS"
+            value: "2"
+          - name: NODE_MASTER
+            value: "true"
+          - name: NODE_DATA
+            value: "false"
+          - name: HTTP_ENABLE
+            value: "false"
+          - name: ES_HEAP_SIZE
+            value: "256m"
+          - name: "DISCOVERY_SERVICE"
+            value: "pelias-master"
+          ports:
+          - containerPort: 9300
+            name: transport
+            protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: pelias-master-1
+              mountPath: /usr/share/elasticsearch/data
+          terminationMessagePath: /dev/termination-log
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - es-master
+        from:
+          kind: ImageStreamTag
+          name: es-master:latest
+      type: ImageChange
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: es-master
+  spec:
+    dockerImageRepository: neoint/pelias-elasticsearch-openshift
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: es-master
+  spec:
+    to:
+      kind: Service
+name: es-master
+
