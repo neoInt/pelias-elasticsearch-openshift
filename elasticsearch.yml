@@ -1,3 +1,0 @@
-bootstrap.memory_lock: true
-cluster.name: ${CLUSTER_NAME}
-discovery.zen.ping.unicast.hosts: ["${DISCOVERY_SERVICE}"]
