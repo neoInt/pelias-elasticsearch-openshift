@@ -1,6 +1,9 @@
 FROM elasticsearch:2.4
 
 ADD config/elasticsearch.yml /usr/share/elasticsearch/config/
+RUN mkdir /usr/share/elasticsearch/schema
+ADD schema/pelias-schema.json /usr/share/elasticsearch/schema/
+ADD create-index.sh /usr/share/elasticsearch/
 RUN chmod +wx /usr/share/elasticsearch/plugins/
 RUN /usr/share/elasticsearch/bin/plugin install analysis-icu
 

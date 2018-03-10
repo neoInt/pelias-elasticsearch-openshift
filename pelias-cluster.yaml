@@ -13,6 +13,9 @@ items:
     - name: transport
       port: 9300
       protocol: TCP
+    - name: http
+      port: 9200
+      protocol: TCP
     selector:
       deploymentconfig: pelias-master
 - apiVersion: v1
@@ -44,21 +47,16 @@ items:
                 fieldPath: metadata.namespace
           - name: "CLUSTER_NAME"
             value: "gazetteer"
-          - name: "NUMBER_OF_MASTERS"
-            value: "2"
-          - name: NODE_MASTER
-            value: "true"
-          - name: NODE_DATA
-            value: "false"
-          - name: HTTP_ENABLE
-            value: "false"
           - name: ES_HEAP_SIZE
-            value: "256m"
+            value: "32g"
           - name: "DISCOVERY_SERVICE"
             value: "pelias-master"
           ports:
           - containerPort: 9300
             name: transport
+            protocol: TCP
+          - containerPort: 9200
+            name: http
             protocol: TCP
           resources: {}
           volumeMounts:
@@ -89,4 +87,3 @@ items:
     to:
       kind: Service
 name: es-master
-
